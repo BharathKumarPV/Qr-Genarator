@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  @font-face{
+    font-family:'Satoshi';
+    src:local('Satoshi'),local('Inter'),local('system-ui');
+  }
+
+  body{
+    background:#09090b;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Satoshi',Inter,system-ui,sans-serif;
+    overflow:hidden;
+    color:#fff;
+  }
+
+  /* ── QR Background Layer ── */
+  .qr-bg{
+    position:fixed;inset:0;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .qr-item{
+    position:absolute;
+    opacity:0.07;
+    image-rendering:pixelated;
+    will-change:transform;
+  }
+
+  /* ── Login Card ── */
+  .login-wrap{
+    position:relative;
+    z-index:10;
+    width:100%;
+    max-width:420px;
+    padding:0 20px;
+  }
+
+  .login-card{
+    background:rgba(24,24,27,0.7);
+    backdrop-filter:blur(24px);
+    -webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:20px;
+    padding:48px 36px 40px;
+    box-shadow:
+      0 25px 60px -12px rgba(0,0,0,0.6),
+      0 0 0 1px rgba(255,255,255,0.03) inset;
+  }
+
+  .logo-area{
+    text-align:center;
+    margin-bottom:36px;
+  }
+
+  .logo-icon{
+    width:48px;height:48px;
+    margin:0 auto 16px;
+    border-radius:14px;
+    background:linear-gradient(135deg,#6366f1,#10b981);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:20px;color:#fff;
+    box-shadow:0 8px 24px rgba(99,102,241,0.3);
+  }
+
+  .logo-area h1{
+    font-size:22px;font-weight:600;
+    letter-spacing:-0.03em;
+    margin-bottom:6px;
+  }
+
+  .logo-area p{
+    font-size:14px;color:#71717a;
+    line-height:1.5;
+  }
+
+  /* ── Form ── */
+  .field{
+    margin-bottom:20px;
+  }
+
+  .field label{
+    display:block;
+    font-size:12px;font-weight:500;
+    color:#a1a1aa;
+    margin-bottom:8px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+
+  .field input{
+    width:100%;
+    background:rgba(0,0,0,0.4);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:15px;
+    color:#fff;
+    outline:none;
+    transition:border-color 0.2s,box-shadow 0.2s;
+    font-family:inherit;
+  }
+
+  .field input::placeholder{
+    color:#52525b;
+  }
+
+  .field input:focus{
+    border-color:#6366f1;
+    box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+  }
+
+  .options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+    font-size:13px;
+  }
+
+  .options label{
+    display:flex;align-items:center;gap:8px;
+    color:#a1a1aa;cursor:pointer;
+    user-select:none;
+  }
+
+  .options label input[type=checkbox]{
+    appearance:none;-webkit-appearance:none;
+    width:16px;height:16px;
+    border:1.5px solid #3f3f46;
+    border-radius:5px;
+    background:transparent;
+    cursor:pointer;
+    position:relative;
+    transition:all 0.15s;
+  }
+
+  .options label input[type=checkbox]:checked{
+    background:#6366f1;border-color:#6366f1;
+  }
+
+  .options label input[type=checkbox]:checked::after{
+    content:'';
+    position:absolute;
+    left:4.5px;top:1.5px;
+    width:5px;height:9px;
+    border:solid #fff;border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+
+  .options a{
+    color:#6366f1;
+    text-decoration:none;
+    font-weight:500;
+    transition:color 0.15s;
+  }
+
+  .options a:hover{color:#818cf8}
+
+  .btn-login{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#6366f1,#10b981);
+    color:#fff;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    cursor:pointer;
+    transition:opacity 0.2s,transform 0.15s;
+    font-family:inherit;
+    box-shadow:0 8px 24px rgba(99,102,241,0.3);
+  }
+
+  .btn-login:hover{
+    opacity:0.9;
+    transform:translateY(-1px);
+  }
+
+  .btn-login:active{
+    transform:translateY(0);opacity:1;
+  }
+
+  .divider{
+    display:flex;align-items:center;gap:14px;
+    margin:28px 0;
+    color:#52525b;font-size:12px;
+    text-transform:uppercase;letter-spacing:0.06em;
+  }
+
+  .divider::before,.divider::after{
+    content:'';flex:1;height:1px;
+    background:rgba(255,255,255,0.06);
+  }
+
+  .social-row{
+    display:flex;gap:12px;
+  }
+
+  .social-btn{
+    flex:1;
+    padding:12px;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:12px;
+    background:rgba(0,0,0,0.25);
+    color:#a1a1aa;
+    font-size:13px;font-weight:500;
+    cursor:pointer;
+    transition:border-color 0.15s,color 0.15s,background 0.15s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:inherit;
+  }
+
+  .social-btn:hover{
+    border-color:rgba(255,255,255,0.15);
+    color:#fff;
+    background:rgba(255,255,255,0.04);
+  }
+
+  .social-btn svg{width:18px;height:18px}
+
+  .footer-text{
+    text-align:center;
+    margin-top:28px;
+    font-size:13px;
+    color:#71717a;
+  }
+
+  .footer-text a{
+    color:#6366f1;
+    text-decoration:none;
+    font-weight:500;
+  }
+
+  .footer-text a:hover{color:#818cf8}
+
+  /* ── Toast ── */
+  .toast{
+    position:fixed;
+    bottom:30px;left:50%;
+    transform:translateX(-50%) translateY(80px);
+    background:#18181b;
+    border:1px solid rgba(255,255,255,0.1);
+    color:#fff;
+    padding:14px 28px;
+    border-radius:12px;
+    font-size:14px;
+    z-index:999;
+    opacity:0;
+    transition:all 0.4s cubic-bezier(0.16,1,0.3,1);
+    pointer-events:none;
+    box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  }
+
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- QR Background -->
+<div class="qr-bg" id="qrBg"></div>
+
+<!-- Login Card -->
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="logo-area">
+      <div class="logo-icon">S</div>
+      <h1>Welcome back</h1>
+      <p>Sign in to your account to continue</p>
+    </div>
+
+    <form id="loginForm" onsubmit="return handleLogin(event)">
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="options">
+        <label><input type="checkbox" checked> Remember me</label>
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-login">Sign in</button>
+    </form>
+
+    <div class="divider">or continue with</div>
+
+    <div class="social-row">
+      <button class="social-btn" onclick="showToast('Google sign-in coming soon')">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09A6.97 6.97 0 0 1 5.48 12c0-.72.13-1.43.36-2.09V7.07H2.18A11.96 11.96 0 0 0 0 12c0 1.94.46 3.77 1.18 5.07l3.66-2.98z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Google
+      </button>
+      <button class="social-btn" onclick="showToast('GitHub sign-in coming soon')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </button>
+    </div>
+
+    <p class="footer-text">
+      Don't have an account? <a href="#">Sign up</a>
+    </p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Generate a realistic QR code on a canvas ──
+function createQR(size) {
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  const modules = 21;
+  const m = size / modules;
+
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#000';
+
+  // helper to draw a finder pattern at (row, col)
+  function finder(r, co) {
+    // outer 7x7
+    for (let dr = 0; dr < 7; dr++)
+      for (let dc = 0; dc < 7; dc++) {
+        const border = dr === 0 || dr === 6 || dc === 0 || dc === 6;
+        const inner = dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4;
+        if (border || inner) ctx.fillRect((co + dc) * m, (r + dr) * m, m, m);
+      }
+  }
+
+  // three finder patterns
+  finder(0, 0);
+  finder(0, modules - 7);
+  finder(modules - 7, 0);
+
+  // timing patterns
+  for (let i = 8; i < modules - 8; i++) {
+    if (i % 2 === 0) {
+      ctx.fillRect(i * m, 6 * m, m, m);
+      ctx.fillRect(6 * m, i * m, m, m);
+    }
+  }
+
+  // alignment pattern at (18,18) roughly
+  function align(r, co) {
+    for (let dr = -2; dr <= 2; dr++)
+      for (let dc = -2; dc <= 2; dc++) {
+        const edge = Math.abs(dr) === 2 || Math.abs(dc) === 2;
+        const center = dr === 0 && dc === 0;
+        if (edge || center) ctx.fillRect((co + dc) * m, (r + dr) * m, m, m);
+      }
+  }
+  align(modules - 9, modules - 9);
+
+  // random data modules (skip finder + timing areas)
+  for (let r = 0; r < modules; r++) {
+    for (let c = 0; c < modules; c++) {
+      // skip finder zones
+      if (r < 8 && c < 8) continue;
+      if (r < 8 && c > modules - 9) continue;
+      if (r > modules - 9 && c < 8) continue;
+      // skip timing
+      if (r === 6 || c === 6) continue;
+      // skip align
+      if (r >= modules - 11 && r <= modules - 7 && c >= modules - 11 && c <= modules - 7) continue;
+      if (Math.random() > 0.5) ctx.fillRect(c * m, r * m, m, m);
+    }
+  }
+
+  return c;
+}
+
+// ── Populate background with QR items ──
+const bg = document.getElementById('qrBg');
+const count = 18;
+const items = [];
+
+for (let i = 0; i < count; i++) {
+  const sz = 80 + Math.random() * 140;
+  const canvas = createQR(Math.round(sz));
+  canvas.className = 'qr-item';
+
+  const x = Math.random() * window.innerWidth;
+  const y = Math.random() * window.innerHeight;
+
+  canvas.style.left = x + 'px';
+  canvas.style.top = y + 'px';
+  canvas.style.width = sz + 'px';
+  canvas.style.height = sz + 'px';
+
+  bg.appendChild(canvas);
+
+  items.push({
+    el: canvas,
+    x, y,
+    vx: (0.3 + Math.random() * 0.7) * (Math.random() < 0.5 ? 1 : -1),
+    vy: (0.2 + Math.random() * 0.5) * (Math.random() < 0.5 ? 1 : -1),
+    sz
+  });
+}
+
+// ── Animation loop ──
+function animate() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
+  for (const q of items) {
+    q.x += q.vx;
+    q.y += q.vy;
+
+    // bounce horizontally
+    if (q.x < -q.sz) q.x = W;
+    else if (q.x > W) q.x = -q.sz;
+
+    // bounce vertically
+    if (q.y < -q.sz) q.y = H;
+    else if (q.y > H) q.y = -q.sz;
+
+    q.el.style.transform = `translate(${q.x - parseFloat(q.el.style.left)}px, ${q.y - parseFloat(q.el.style.top)}px)`;
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// ── Handle resize ──
+window.addEventListener('resize', () => {
+  // items will naturally wrap via the bounce logic
+});
+
+// ── Login handler ──
+function handleLogin(e) {
+    e.preventDefault();
+
+    window.location.href = "index.html";
+
+    return false;
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
